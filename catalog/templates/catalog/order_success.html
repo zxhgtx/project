@@ -1,0 +1,28 @@
+{% extends "catalog/base.html" %}
+{% load humanize %}
+
+{% block title %}Заказ принят — PC STORE{% endblock %}
+
+{% block content %}
+<div class="container">
+    <section class="about-page">
+        <span class="welcome-label">ЗАКАЗ №{{ order.pk }}</span>
+        <h1>Спасибо, <span>{{ order.name }}</span></h1>
+        <p class="lead">Мы получили заявку на {{ order.total|floatformat:0|intcomma }} ₸ и свяжемся с вами по номеру {{ order.phone }}.</p>
+
+        <div class="checkout-summary success-card">
+            <h2>Что в заказе</h2>
+            <ul>
+                {% for item in order.items.all %}
+                    <li>
+                        <span>{{ item.name }} × {{ item.quantity }}</span>
+                        <strong>{{ item.subtotal|floatformat:0|intcomma }} ₸</strong>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <a href="{% url 'product_list' %}" class="main-button">Вернуться в каталог</a>
+    </section>
+</div>
+{% endblock %}

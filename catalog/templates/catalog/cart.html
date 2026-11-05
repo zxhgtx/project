@@ -1,0 +1,63 @@
+{% extends "catalog/base.html" %}
+{% load humanize %}
+
+{% block title %}Корзина — PC STORE{% endblock %}
+
+{% block content %}
+<div class="container">
+    <section class="cart-page">
+        <span class="welcome-label">ВАШ ЗАКАЗ</span>
+        <h1>Корзина</h1>
+
+        {% if items %}
+            <div class="cart-list">
+                {% for item in items %}
+                    <article class="cart-item">
+                        <a href="{% url 'product_detail' item.product.pk %}" class="cart-thumb">
+                            {% if item.product.image %}
+                                <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}">
+                            {% else %}
+                                <div class="product-placeholder small">PC</div>
+                            {% endif %}
+                        </a>
+                        <div class="cart-meta">
+                            <a href="{% url 'product_detail' item.product.pk %}">{{ item.product.name }}</a>
+                            <span>{{ item.product.category.name|default:"Комплектующие" }} · {{ item.product.price|floatformat:0|intcomma }} ₸</span>
+                        </div>
+                        <form method="post" action="{% url 'update_cart' item.product.pk %}" class="cart-qty">
+                            {% csrf_token %}
+                            <input type="number" name="qty" value="{{ item.quantity }}" min="1" max="99">
+                            <button type="submit" class="ghost-button compact">Обновить</button>
+                        </form>
+                        <div class="cart-sum">{{ item.subtotal|floatformat:0|intcomma }} ₸</div>
+                        <form method="post" action="{% url 'update_cart' item.product.pk %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="remove">
+                            <button type="submit" class="text-button">Удалить</button>
+                        </form>
+                    </article>
+                {% endfor %}
+            </div>
+
+            <div class="cart-total">
+                <div>
+                    <span>Итого</span>
+                    <strong>{{ total|floatformat:0|intcomma }} ₸</strong>
+                    <form method="post" action="{% url 'clear_cart' %}" class="clear-form">
+                        {% csrf_token %}
+                        <button type="submit" class="text-button">Очистить корзину</button>
+                    </form>
+                </div>
+                <p>Оформите заказ на сайте — менеджер подтвердит наличие и доставку.</p>
+                <a href="{% url 'checkout' %}" class="main-button">Оформить заказ</a>
+            </div>
+        {% else %}
+            <div class="empty-catalog">
+                <h3>Корзина пуста</h3>
+                <p>Добавьте комплектующие из каталога — они появятся здесь.</p>
+                <a href="{% url 'product_list' %}" class="main-button">Перейти в каталог</a>
+            </div>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}

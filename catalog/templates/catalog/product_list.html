@@ -1,0 +1,141 @@
+{% extends "catalog/base.html" %}
+
+{% block title %}
+    {% if selected_category %}{{ selected_category.name }} — PC STORE{% elif query %}Поиск: {{ query }} — PC STORE{% else %}PC STORE — Комплектующие{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container">
+
+    {% if show_hero %}
+    <section class="welcome">
+        <div>
+            <span class="welcome-label">PC STORE / HARDWARE</span>
+            <h1>Собери свой<br><span>идеальный ПК</span></h1>
+            <p>Видеокарты, процессоры, память и накопители для игровых и рабочих сборок. Цены в тенге, доставка по Казахстану.</p>
+            <div class="hero-actions">
+                <a href="#catalog" class="main-button">Смотреть каталог</a>
+                <a href="{% url 'about' %}" class="ghost-button">О магазине</a>
+            </div>
+            <div class="hero-stats">
+                <div>
+                    <strong>{{ total_count }}</strong>
+                    <span>товаров</span>
+                </div>
+                <div>
+                    <strong>{{ categories|length }}</strong>
+                    <span>категорий</span>
+                </div>
+                <div>
+                    <strong>24/7</strong>
+                    <span>онлайн-заказ</span>
+                </div>
+            </div>
+        </div>
+        <div class="welcome-decoration">
+            <div class="decoration-circle"></div>
+            <div class="decoration-circle inner"></div>
+            <span>PC<br>HARDWARE</span>
+        </div>
+    </section>
+    {% endif %}
+
+    <section class="catalog" id="catalog">
+        <div class="section-heading">
+            <div>
+                <span class="welcome-label">НАШ АССОРТИМЕНТ</span>
+                <h2>
+                    {% if selected_category %}{{ selected_category.name }}
+                    {% elif query %}Результаты поиска
+                    {% else %}Каталог товаров{% endif %}
+                </h2>
+            </div>
+            <span class="product-count">ТОВАРОВ: {{ total_count }}</span>
+        </div>
+
+        <div class="toolbar">
+            <form method="get" class="sort-form">
+                {% if query %}<input type="hidden" name="q" value="{{ query }}">{% endif %}
+                {% if selected_category %}<input type="hidden" name="category" value="{{ selected_category.slug }}">{% endif %}
+                {% if in_stock_only %}<input type="hidden" name="in_stock" value="1">{% endif %}
+                {% if min_price %}<input type="hidden" name="min_price" value="{{ min_price }}">{% endif %}
+                {% if max_price %}<input type="hidden" name="max_price" value="{{ max_price }}">{% endif %}
+                <label for="sort">Сортировка</label>
+                <select id="sort" name="sort" onchange="this.form.submit()">
+                    {% for key, value in sort_choices.items %}
+                        <option value="{{ key }}" {% if sort == key %}selected{% endif %}>{{ value.1 }}</option>
+                    {% endfor %}
+                </select>
+            </form>
+        </div>
+
+        <div class="catalog-layout">
+            <aside class="sidebar">
+                <h3>Категории</h3>
+                <a href="{% url 'product_list' %}{% if query %}?q={{ query|urlencode }}{% endif %}" class="category{% if not selected_category %} active{% endif %}">
+                    Все товары
+                </a>
+                {% for category in categories %}
+                    <a href="?category={{ category.slug }}{% if query %}&q={{ query|urlencode }}{% endif %}&sort={{ sort }}{% if in_stock_only %}&in_stock=1{% endif %}{% if min_price %}&min_price={{ min_price }}{% endif %}{% if max_price %}&max_price={{ max_price }}{% endif %}" class="category{% if selected_category.slug == category.slug %} active{% endif %}">
+                        {{ category.name }}
+                        <span>{{ category.product_count }}</span>
+                    </a>
+                {% empty %}
+                    <p class="sidebar-hint">Категории появятся после заполнения админки.</p>
+                {% endfor %}
+
+                <form method="get" class="filter-form">
+                    {% if query %}<input type="hidden" name="q" value="{{ query }}">{% endif %}
+                    {% if selected_category %}<input type="hidden" name="category" value="{{ selected_category.slug }}">{% endif %}
+                    <input type="hidden" name="sort" value="{{ sort }}">
+                    <h3>Фильтры</h3>
+                    <label class="check-line">
+                        <input type="checkbox" name="in_stock" value="1" {% if in_stock_only %}checked{% endif %}>
+                        Только в наличии
+                    </label>
+                    <label class="field-label">Цена от</label>
+                    <input type="number" name="min_price" min="0" step="1000" value="{{ min_price }}" placeholder="0">
+                    <label class="field-label">Цена до</label>
+                    <input type="number" name="max_price" min="0" step="1000" value="{{ max_price }}" placeholder="500000">
+                    <button type="submit" class="main-button compact">Применить</button>
+                    {% if query or selected_category or in_stock_only or min_price or max_price %}
+                        <a href="{% url 'product_list' %}" class="ghost-button compact">Сбросить</a>
+                    {% endif %}
+                </form>
+            </aside>
+
+            <div class="products">
+                {% for product in products %}
+                    {% include "catalog/_product_card.html" %}
+                {% empty %}
+                    <div class="empty-catalog">
+                        <h3>{% if query or selected_category or in_stock_only or min_price or max_price %}Ничего не найдено{% else %}Пока нет товаров{% endif %}</h3>
+                        <p>
+                            {% if query or selected_category or in_stock_only or min_price or max_price %}
+                                Попробуйте другой запрос или сбросьте фильтры.
+                            {% else %}
+                                Добавьте товары через панель администратора Django.
+                            {% endif %}
+                        </p>
+                        {% if query or selected_category or in_stock_only or min_price or max_price %}
+                            <a href="{% url 'product_list' %}" class="main-button">Сбросить фильтры</a>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        {% if page.has_other_pages %}
+            <nav class="pagination" aria-label="Страницы">
+                {% if page.has_previous %}
+                    <a href="?page={{ page.previous_page_number }}{% if query %}&q={{ query|urlencode }}{% endif %}{% if selected_category %}&category={{ selected_category.slug }}{% endif %}&sort={{ sort }}{% if in_stock_only %}&in_stock=1{% endif %}{% if min_price %}&min_price={{ min_price }}{% endif %}{% if max_price %}&max_price={{ max_price }}{% endif %}">Назад</a>
+                {% endif %}
+                <span>Страница {{ page.number }} из {{ page.paginator.num_pages }}</span>
+                {% if page.has_next %}
+                    <a href="?page={{ page.next_page_number }}{% if query %}&q={{ query|urlencode }}{% endif %}{% if selected_category %}&category={{ selected_category.slug }}{% endif %}&sort={{ sort }}{% if in_stock_only %}&in_stock=1{% endif %}{% if min_price %}&min_price={{ min_price }}{% endif %}{% if max_price %}&max_price={{ max_price }}{% endif %}">Вперёд</a>
+                {% endif %}
+            </nav>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}

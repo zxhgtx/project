@@ -1,0 +1,39 @@
+{% extends "catalog/base.html" %}
+
+{% block title %}О магазине — PC STORE{% endblock %}
+
+{% block content %}
+<div class="container">
+    <section class="about-page">
+        <span class="welcome-label">PC STORE / ABOUT</span>
+        <h1>Магазин комплектующих<br><span>для настоящих сборок</span></h1>
+        <p class="lead">Подбираем железо под задачи: игры, монтаж, офис и серверные решения. Помогаем собрать совместимую конфигурацию и не переплатить за лишнее.</p>
+
+        <div class="about-grid">
+            <article>
+                <h3>Ассортимент</h3>
+                <p>В каталоге {{ product_count }} товар(а) и {{ category_count }} категорий: видеокарты, процессоры, память, накопители и питание.</p>
+            </article>
+            <article>
+                <h3>Проверка</h3>
+                <p>Каждый товар проходит визуальный контроль. Если нужна помощь с совместимостью — напишите до оплаты.</p>
+            </article>
+            <article>
+                <h3>Доставка</h3>
+                <p>Самовывоз г.Астана и доставка по Казахстану. Срок и стоимость уточняем при подтверждении заказа.</p>
+            </article>
+        </div>
+
+        <div class="contact-card">
+            <div>
+                <h2>Связаться</h2>
+                <p>+7 (700) 000-00-00<br>hello@pcstore.kz<br>г. Астана, ежедневно 10:00–20:00</p>
+            </div>
+            <div class="hero-actions">
+                <a href="{% url 'product_list' %}" class="main-button">Открыть каталог</a>
+                <a href="{% url 'cart' %}" class="ghost-button">Перейти в корзину</a>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}

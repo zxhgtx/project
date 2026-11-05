@@ -1,0 +1,33 @@
+{% load humanize %}
+<article class="product-card">
+    <a href="{% url 'product_detail' product.pk %}" class="product-media">
+        <div class="product-image">
+            {% if product.image %}
+                <img src="{{ product.image.url }}" alt="{{ product.name }}">
+            {% else %}
+                <div class="product-placeholder">PC</div>
+            {% endif %}
+            {% if not product.in_stock %}
+                <span class="stock-badge">Нет в наличии</span>
+            {% endif %}
+        </div>
+    </a>
+    <div class="product-info">
+        <span class="product-category">{{ product.category.name|default:"КОМПЛЕКТУЮЩИЕ" }}</span>
+        <h3><a href="{% url 'product_detail' product.pk %}">{{ product.name }}</a></h3>
+        <div class="product-bottom">
+            <div class="price">{{ product.price|floatformat:0|intcomma }} ₸</div>
+            {% if compact %}
+                <span class="details">{% if product.in_stock %}В наличии{% else %}Под заказ{% endif %}</span>
+            {% elif product.in_stock %}
+                <form method="post" action="{% url 'add_to_cart' product.pk %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                    <button type="submit" class="ghost-button compact">В корзину</button>
+                </form>
+            {% else %}
+                <span class="details">Под заказ</span>
+            {% endif %}
+        </div>
+    </div>
+</article>

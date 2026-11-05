@@ -1,0 +1,67 @@
+{% extends "catalog/base.html" %}
+{% load humanize %}
+
+{% block title %}{{ product.name }} — PC STORE{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="detail-page">
+        <a href="{% url 'product_list' %}" class="back-link">← Вернуться в каталог</a>
+
+        <div class="detail-card">
+            <div class="detail-image">
+                {% if product.image %}
+                    <img src="{{ product.image.url }}" alt="{{ product.name }}">
+                {% else %}
+                    <div class="product-placeholder">PC</div>
+                {% endif %}
+            </div>
+
+            <div class="detail-info">
+                <span class="welcome-label">{{ product.category.name|default:"PC STORE / HARDWARE" }}</span>
+                <h1>{{ product.name }}</h1>
+
+                <div class="detail-price">{{ product.price|floatformat:0|intcomma }} ₸</div>
+
+                <p class="detail-description">
+                    {% if product.description %}
+                        {{ product.description|linebreaksbr }}
+                    {% else %}
+                        Надёжное комплектующее для игрового или рабочего компьютера. Подробные характеристики уточняйте у менеджера — поможем подобрать совместимую сборку.
+                    {% endif %}
+                </p>
+
+                <div class="availability {% if not product.in_stock %}out{% endif %}">
+                    <span class="availability-dot"></span>
+                    {% if product.in_stock %}В наличии{% else %}Нет в наличии{% endif %}
+                </div>
+
+                {% if product.in_stock %}
+                    <form method="post" action="{% url 'add_to_cart' product.pk %}" class="buy-form">
+                        {% csrf_token %}
+                        <input type="hidden" name="next" value="{% url 'cart' %}">
+                        <label>
+                            Кол-во
+                            <input type="number" name="qty" value="1" min="1" max="99">
+                        </label>
+                        <button type="submit" class="main-button">В корзину</button>
+                    </form>
+                {% else %}
+                    <a href="{% url 'product_list' %}" class="ghost-button">Смотреть другие товары</a>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if related %}
+            <section class="related">
+                <h2>Похожие товары</h2>
+                <div class="products related-grid">
+                    {% for product in related %}
+                        {% include "catalog/_product_card.html" with compact=True %}
+                    {% endfor %}
+                </div>
+            </section>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

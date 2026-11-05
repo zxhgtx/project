@@ -1,0 +1,56 @@
+{% extends "catalog/base.html" %}
+{% load humanize %}
+
+{% block title %}Оформление заказа — PC STORE{% endblock %}
+
+{% block content %}
+<div class="container">
+    <section class="checkout-page">
+        <a href="{% url 'cart' %}" class="back-link">← Назад в корзину</a>
+        <span class="welcome-label">CHECKOUT</span>
+        <h1>Оформление заказа</h1>
+
+        <div class="checkout-layout">
+            <form method="post" class="checkout-form" novalidate>
+                {% csrf_token %}
+                <label>
+                    Имя *
+                    <input type="text" name="name" value="{{ form.name }}" required maxlength="120">
+                    {% if errors.name %}<span class="field-error">{{ errors.name }}</span>{% endif %}
+                </label>
+                <label>
+                    Телефон *
+                    <input type="tel" name="phone" value="{{ form.phone }}" required placeholder="+7 700 000 00 00">
+                    {% if errors.phone %}<span class="field-error">{{ errors.phone }}</span>{% endif %}
+                </label>
+                <label>
+                    Email
+                    <input type="email" name="email" value="{{ form.email }}" placeholder="необязательно">
+                    {% if errors.email %}<span class="field-error">{{ errors.email }}</span>{% endif %}
+                </label>
+                <label>
+                    Комментарий
+                    <textarea name="comment" rows="4" placeholder="Адрес, удобное время, пожелания по сборке">{{ form.comment }}</textarea>
+                </label>
+                <button type="submit" class="main-button">Отправить заказ</button>
+            </form>
+
+            <aside class="checkout-summary">
+                <h2>Состав</h2>
+                <ul>
+                    {% for item in items %}
+                        <li>
+                            <span>{{ item.product.name }} × {{ item.quantity }}</span>
+                            <strong>{{ item.subtotal|floatformat:0|intcomma }} ₸</strong>
+                        </li>
+                    {% endfor %}
+                </ul>
+                <div class="checkout-total">
+                    Итого
+                    <strong>{{ total|floatformat:0|intcomma }} ₸</strong>
+                </div>
+            </aside>
+        </div>
+    </section>
+</div>
+{% endblock %}
